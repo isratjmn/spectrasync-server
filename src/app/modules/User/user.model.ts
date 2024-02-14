@@ -1,34 +1,82 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { ROLE } from './user.constant';
+import { MAIN_ROLE } from './user.constant';
+import bcrypt from 'bcrypt';
+import config from '../../config';
 
+// Define TUser interface
 export interface TUser extends Document {
   _id: mongoose.Types.ObjectId;
   username: string;
   email: string;
   password: string;
-  role: TRole;
+  role: 'user' | 'manager';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const UserSchema = new Schema<TUser>({
-  username: {
-    type: String,
-    required: true,
+// Define UserSchema
+const UserSchema = new Schema<TUser>(
+  {
+    username: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(MAIN_ROLE),
+      default: MAIN_ROLE.user,
+    },
   },
-  email: {
-    type: String,
-    required: true,
+  {
+    timestamps: true,
   },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: Object.values(ROLE),
-    default: 'user',
-  },
+);
+
+UserSchema.pre('save', async function (next) {
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+  next();
 });
 
-const User = mongoose.model<TUser>('User', UserSchema);
-export type TRole = keyof typeof ROLE;
-export { User };
+UserSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
+
+UserSchema.statics.isUserExists = async function (username: string) {
+  const existingUser = await User.findOne({ username });
+  return existingUser;
+};
+
+UserSchema.statics.isPasswordMatched = async function (
+  plainTextPass: string,
+  hashedPass: string,
+) {
+  const isMatched = await bcrypt.compare(plainTextPass, hashedPass);
+  return isMatched;
+};
+
+UserSchema.statics.isJWTIssuedBeforePasswordChanged = function (
+  passwordChangedTimestamp: Date,
+  jwtIssuedTimestamp: number,
+) {
+  const passwordChangedTimes =
+    new Date(passwordChangedTimestamp).getTime() / 1000;
+  return passwordChangedTimes > jwtIssuedTimestamp;
+};
+
+export type TUserRole = keyof typeof MAIN_ROLE;
+
+export const User = mongoose.model<TUser>('User', UserSchema);

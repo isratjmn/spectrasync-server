@@ -27,7 +27,7 @@ export const getAllEyeglassesDB = async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: 'Flowers Fetched successfully',
+    message: 'Eye Glasses Fetched successfully',
     meta: meta,
     data: eyeglasses,
   });

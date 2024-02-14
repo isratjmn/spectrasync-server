@@ -2,13 +2,11 @@ import { Request, Response } from 'express';
 import { registerUser, loginUser } from './auth.service';
 import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
+import wrapAsync from '../../utils/wrapAsync';
+import config from '../../config';
 
-export const registerUserHandler = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const { username, email, password } = req.body;
-  const newUser = await registerUser(username, email, password);
+export const registerUserHandler = async (req: Request, res: Response) => {
+  const newUser = await registerUser(req.body);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -22,7 +20,33 @@ export const registerUserHandler = async (
   });
 };
 
-export const loginUserHandler = async (
+export const loginUserHandler = wrapAsync(
+  async (req: Request, res: Response) => {
+    const result = await loginUser(req.body);
+    const { accessToken, user } = result;
+
+    let successMessage = '';
+    if (user.role === 'user') {
+      successMessage = 'User is logged in successfully!';
+    } else if (user.role === 'manager') {
+      successMessage = 'Manager is logged in successfully!';
+    }
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: successMessage,
+      data: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        accessToken,
+      },
+    });
+  },
+);
+
+/* export const loginUserHandler = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
@@ -41,4 +65,4 @@ export const loginUserHandler = async (
       token,
     },
   });
-};
+}; */

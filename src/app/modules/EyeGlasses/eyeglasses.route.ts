@@ -8,6 +8,8 @@ import {
   updateEyeGlass,
 } from './eyeglasses.controller';
 import { upload } from '../../utils/SendImageCloud';
+import authGuard from '../../../Middleware/AuthGuard';
+import { MAIN_ROLE } from '../User/user.constant';
 const router: Router = express.Router();
 // Create a new pair of eyeglasses
 router.post(
@@ -19,9 +21,13 @@ router.post(
   },
   addEyeglasses,
 );
-// Get all eyeglasses
-router.get('/', getAllEyeglassesDB);
-// Route for fetching a single eyeglass by ID
+
+router.get(
+  '/',
+  authGuard(MAIN_ROLE.manager),
+  getAllEyeglassesDB,
+);
+
 router.get('/:id', getEyeGlass);
 router.put('/:eyeglassId', updateEyeGlass);
 router.delete('/', deleteEyeGlass);

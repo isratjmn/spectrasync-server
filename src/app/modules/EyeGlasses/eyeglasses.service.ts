@@ -34,7 +34,6 @@ export const createEyeglasses = async (
   eyeglassesData: EyeglassesAttributes,
 ): Promise<EyeglassesAttributes> => {
   try {
-    // Upload the image to the cloud storage if a file is provided
     if (file) {
       const imageName = `sale_${eyeglassesData.quantity.toString().padStart(3, '0')}`;
       const result: any = await sendImageCloud(imageName, file.path);
@@ -54,7 +53,7 @@ export const createEyeglasses = async (
     return newEyeglasses;
   } catch (error) {
     console.error(error);
-    throw new Error('Internal Server Error');
+    throw new Error('Internal Server Error....');
   }
 };
 

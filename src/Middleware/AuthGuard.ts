@@ -2,15 +2,14 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { JwtPayload } from 'jsonwebtoken';
-import { TRole, User } from '../app/modules/User/user.model';
-import wrapAsync from '../app/utils/wrapAsync';
+import { TUserRole, User } from '../app/modules/User/user.model';
 import appError from '../app/ErrorHandler/AppError';
 import JWTError from '../app/ErrorHandler/JWTError';
 import config from '../app/config';
 import { verifyToken } from '../app/modules/Auth/auth.utils';
 
 export const authGuard =
-  (...roles: string[]) =>
+  (...requiredRoles: TUserRole[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Extract token from request headers
@@ -20,34 +19,40 @@ export const authGuard =
       if (!token) {
         throw new appError(
           httpStatus.UNAUTHORIZED,
-          'Unauthorized Access!! Token not provided',
+          'Unauthorized Access!! Token Not Provided',
+        );
+      }
+      // Verify the JWT token
+      const decoded = verifyToken(token, config.jwt_access_secret as string);
+      // If decoded token is null or undefined, throw Unauthorized error
+      if (!decoded) {
+        throw new appError(
+          httpStatus.UNAUTHORIZED,
+          'Unauthorized Access!! Invalid Token',
         );
       }
 
-      // Verify the JWT token
-      const decoded = verifyToken(token, config.jwt_access_secret as string);
-
-      // Extract user ID from token payload
-      const userId = (decoded as { userId: string }).userId;
+      // Extract user ID and roel from token payload
+      const { _id, role } = decoded;
 
       // Find user in the database by ID
-      const user = await User.findById(userId);
-
+      const user = await User.findById(_id);
       // If user not found, throw Not Found error
       if (!user) {
-        throw new appError(httpStatus.NOT_FOUND, 'User Not found!!!');
+        throw new appError(httpStatus.NOT_FOUND, 'User Not Found!!!');
       }
 
       // Check if user has the required role
-      if (roles.length && !roles.includes(user.role)) {
+      if (requiredRoles.length && !requiredRoles.includes(role as TUserRole)) {
         throw new appError(
           httpStatus.FORBIDDEN,
-          'You do not have permission to access this resource',
+          'You do not have Permission to Access this Resource!!',
         );
       }
 
       // Add user information to the request object
       req.user = user;
+      console.log(user)
 
       // Call the next middleware function
       next();
