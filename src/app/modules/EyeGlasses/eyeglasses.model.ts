@@ -1,5 +1,11 @@
 import { Schema, model, Document } from 'mongoose';
-import { TFrameMaterial, TName, TGender } from './eyeglasses.constant';
+import {
+  TFrameMaterial,
+  TName,
+  TGender,
+  TBrand,
+  TColor,
+} from './eyeglasses.constant';
 
 interface EyeglassesAttributes {
   name: typeof TName;
@@ -9,13 +15,12 @@ interface EyeglassesAttributes {
   frameMaterial: typeof TFrameMaterial;
   frameShape: string;
   lensType: string;
-  brand: string;
-  color: string;
+  brand: typeof TBrand;
+  color: typeof TColor;
   priceRange: string;
   gender: typeof TGender;
   isDeleted?: boolean;
 }
-
 interface EyeglassesDocument extends Document, EyeglassesAttributes {}
 
 const EyeglassesSchema = new Schema<EyeglassesDocument>(
@@ -51,11 +56,13 @@ const EyeglassesSchema = new Schema<EyeglassesDocument>(
     },
     brand: {
       type: String,
+      enum: TBrand,
       required: true,
     },
     color: {
       type: String,
       required: true,
+      enum: TColor,
     },
     priceRange: {
       type: String,

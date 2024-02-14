@@ -1,4 +1,4 @@
-# SpectraSync
+## SpectraSync
 
 ### Eye Glass Dashboard Management App
 
@@ -17,7 +17,7 @@ Before you begin, make sure you have the following installed on your machine:
   npm install -g typescript
 ```
 
-# Installing
+## Installing
 
 ## Clone the repository:
 
@@ -49,9 +49,13 @@ Create a `.env` file in the root of the project and add any necessary environmen
   JWT_ACCESS_SECRET=b8f3bc5620ddf98594b408877e5e4952774a20906f9d381a75ba7fb2598cf9af
   JWT_ACCESS_EXPIRES_IN=1d
   BCRYPT_SALT_ROUNDS=10
+  CLOUDINARY_CLOUD_NAME=dmr810p4l
+  CLOUDINARY_API_KEY=847319449751949
+  CLOUDINARY_API_SECRET=8XGZjxc8BtcWI8XZ1wwCVvg-x_0
+
 ```
 
-# Usage
+## Usage
 
 ## Development Mode
 

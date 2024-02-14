@@ -11,7 +11,7 @@ import {
   updateEyeGlassData,
 } from './eyeglasses.service';
 
-export const getAllEyeglassesDB = async (req: Request, res: Response) => {
+/* export const getAllEyeglassesDB = async (req: Request, res: Response) => {
   try {
     const eyeglasses = await getAllEyeglasses();
     res.status(200).json(eyeglasses);
@@ -19,20 +19,19 @@ export const getAllEyeglassesDB = async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-};
+}; */
 
-/* export const getAllEyeglassesDB = async (req: Request, res: Response) => {
-  const eyeglassResult = await getAllEyeglass(req.query);
+export const getAllEyeglassesDB = async (req: Request, res: Response) => {
+  const eyeglassResult = await getAllEyeglasses(req.query);
   const { eyeglasses, meta } = eyeglassResult;
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'Flowers Fetched successfully',
-    // meta: meta,
+    meta: meta,
     data: eyeglasses,
   });
 };
- */
 
 export const addEyeglasses = async (req: Request, res: Response) => {
   try {

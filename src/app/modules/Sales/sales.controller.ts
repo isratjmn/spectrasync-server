@@ -55,6 +55,7 @@ export const getAllSalesController = async (
   });
 };
 
+//* Get daily sales history
 export const getDailyHistory = async (req: Request, res: Response) => {
   const dailySales = await salesService.getDailySalesHistory();
   sendResponse(res, {
@@ -65,6 +66,7 @@ export const getDailyHistory = async (req: Request, res: Response) => {
   });
 };
 
+//* Get weekly sales history
 export const getWeeklyHistory = async (req: Request, res: Response) => {
   const weeklySales = await salesService.getWeeklySalesHistory();
   sendResponse(res, {
@@ -75,7 +77,7 @@ export const getWeeklyHistory = async (req: Request, res: Response) => {
   });
 };
 
-// Get monthly sales history
+//* Get monthly sales history
 export const getMonthlyHistory = async (req: Request, res: Response) => {
   const monthlySales = await salesService.getMonthlySalesHistory();
   sendResponse(res, {
@@ -86,7 +88,7 @@ export const getMonthlyHistory = async (req: Request, res: Response) => {
   });
 };
 
-// Get yearly sales history
+//* Get yearly sales history
 export const getYearlyHistory = async (req: Request, res: Response) => {
   const yearlySales = await salesService.getWeeklySalesHistory();
   sendResponse(res, {

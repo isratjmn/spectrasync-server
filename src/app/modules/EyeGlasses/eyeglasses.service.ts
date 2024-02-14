@@ -4,13 +4,12 @@ import { EyeglassesModel, EyeglassesAttributes } from './eyeglasses.model';
 import { sendImageCloud } from '../../utils/SendImageCloud';
 import { eyeGlassesFilter } from './eyeglasses.utils';
 
-
-export const getAllEyeglasses = async (): Promise<EyeglassesAttributes[]> => {
+/* export const getAllEyeglasses = async (): Promise<EyeglassesAttributes[]> => {
   const eyeglasses = await EyeglassesModel.find();
   return eyeglasses;
-};
+}; */
 
-/* export const getAllEyeglass = async (query: Record<string, unknown>) => {
+export const getAllEyeglasses = async (query: Record<string, unknown>) => {
   const { page, limit } = query;
   const { filter, sort } = eyeGlassesFilter(query);
   const pageNumber = typeof page === 'number' ? page : 1;
@@ -28,7 +27,7 @@ export const getAllEyeglasses = async (): Promise<EyeglassesAttributes[]> => {
     totalPages: totalPages,
   };
   return { eyeglasses: eyeGlasses, meta: meta };
-}; */
+};
 
 export const createEyeglasses = async (
   file: any,

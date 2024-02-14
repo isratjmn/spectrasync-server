@@ -4,7 +4,6 @@ import { authUserServices } from './user.service';
 
 const authUserRegister = wrapAsync(async (req, res) => {
   const user = await authUserServices.authUserRegisterIntoDB(req.body);
-
   sendResponse(res, {
     success: true,
     statusCode: 201,
