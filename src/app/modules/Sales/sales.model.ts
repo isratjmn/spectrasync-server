@@ -1,29 +1,20 @@
-import mongoose, { Document, Schema, Types } from 'mongoose';
-export interface Sale {
-  eyeglassId?: Types.ObjectId;
-  quantity: number;
-  buyerName: string;
-  saleDate: Date;
-}
+import { Schema, model } from "mongoose";
+import { TSales } from "./sales.interface";
 
-export interface SaleDocument extends Sale, Document {}
-const saleSchema = new Schema({
-  eyeglassId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Eyeglasses',
+const salesSchema = new Schema<TSales>(
+  {
+    productId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Eyeglass",
+    },
+    quantity: { type: Number, required: true },
+    buyerName: { type: String, required: true },
+    userEmail: { type: String, required: true },
   },
-  quantity: {
-    type: Number,
-    required: true,
-  },
-  buyerName: {
-    type: String,
-    required: true,
-  },
-  saleDate: {
-    type: Date,
-    required: true,
-  },
-});
-const SaleModel = mongoose.model<SaleDocument>('Sale', saleSchema);
-export default SaleModel;
+  {
+    timestamps: true,
+  }
+);
+
+export const Sales = model<TSales>("Sale", salesSchema);

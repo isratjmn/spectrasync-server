@@ -1,106 +1,140 @@
-import httpStatus from 'http-status';
-import appError from '../../ErrorHandler/AppError';
-import SaleModel, { Sale, SaleDocument } from './sales.model';
-import { EyeglassesModel } from '../EyeGlasses/eyeglasses.model';
+import httpStatus from "http-status";
+import AppError from "../../errors/AppError";
+import { Eyeglass } from "../product/product.model";
+import { TSales } from "./sales.interface";
+import { Sales } from "./sales.model";
+import { User } from "../user/user.model";
 
-export const addSale = async (saleData: Sale) => {
-  const { eyeglassId, quantity } = saleData;
-  const eyaGlasses = await EyeglassesModel.findById(eyeglassId);
-  console.log(eyeglassId);
-  if (!eyaGlasses || eyaGlasses.quantity < quantity) {
-    throw new appError(
-      httpStatus.NOT_FOUND,
-      'nvalid product or insufficient quantity',
-    );
+const createSalesIntoDB = async (payload: TSales) => {
+  const { productId, quantity } = payload;
+  const userEmail = payload.userEmail;
+  const userExist = await User.findOne({ email: userEmail });
+  if (!userExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
-  // Create sale record
-  const eyeGlassQuantity = eyaGlasses.quantity - quantity;
-  await EyeglassesModel.findByIdAndUpdate(eyeglassId, {
-    quantity: eyeGlassQuantity,
-  });
-  const sale = await SaleModel.create(saleData);
-  return sale;
-};
 
-export const getAllSales = async (): Promise<SaleDocument[]> => {
-  try {
-    const allSales = await SaleModel.find();
-    return allSales;
-  } catch (error: any) {
-    throw new Error(`Error getting all sales: ${error.message}`);
-  }
-};
-
-export const getDailySalesHistory = async () => {
-  try {
-    // Get the current date in the user's timezone
-    const today = new Date();
-    console.log(today);
-
-    // Set the start of the day to 00:00:00
-    const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      0,
-      0,
-      0,
-    );
-    // Set the end of the day to 23:59:59
-    const endOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      23,
-      59,
-      59,
-    );
-    // Find sales data within the range of the current day
-    const sales = await SaleModel.find({
-      saleDate: { $gte: startOfDay, $lte: endOfDay },
-    });
-    return sales;
-  } catch (err: any) {
-    throw new Error(err.message);
-  }
-};
-
-export const getWeeklySalesHistory = async () => {
-  const today = new Date();
-  const startOfWeek = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - today.getDay(),
+  const result = await Eyeglass.findOneAndUpdate(
+    { _id: productId, productQuantity: { $gte: quantity } },
+    { $inc: { productQuantity: -quantity } },
+    { new: true }
   );
-  const endOfWeek = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - today.getDay() + 7,
-  );
-  const sales = await SaleModel.find({
-    saleDate: { $gte: startOfWeek, $lt: endOfWeek },
-  });
-  return sales;
+
+  if (result) {
+    if (result.productQuantity === 0) {
+      await Eyeglass.deleteOne({ _id: productId });
+    }
+    const salesResult = await Sales.create(payload);
+    return salesResult;
+  } else {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Insufficient quantity or glass not found"
+    );
+  }
 };
 
-// Get monthly sales history
-export const getMonthlySalesHistory = async () => {
-  const today = new Date();
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const sales = await SaleModel.find({
-    saleDate: { $gte: startOfMonth, $lte: endOfMonth },
-  });
-  return sales;
+const getAllSalesIntoDB = async (
+  query: Record<string, unknown>,
+  email: string,
+  role: string
+) => {
+  const { filterBy } = query;
+
+  let dateFilter: Record<string, unknown> = {};
+
+  if (filterBy) {
+    const currentDate = new Date();
+
+    switch (filterBy) {
+      case "daily":
+        dateFilter = {
+          createdAt: {
+            $gte: new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              currentDate.getDate()
+            ),
+            $lt: new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              currentDate.getDate() + 1
+            ),
+          },
+        };
+        break;
+      case "weekly":
+        dateFilter = {
+          createdAt: {
+            $gte: new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              currentDate.getDate() - currentDate.getDay()
+            ),
+            $lt: new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              currentDate.getDate() + (6 - currentDate.getDay()) + 1
+            ),
+          },
+        };
+        break;
+      case "monthly":
+        dateFilter = {
+          createdAt: {
+            $gte: new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              1
+            ),
+            $lt: new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth() + 1,
+              1
+            ),
+          },
+        };
+        break;
+      case "yearly":
+        dateFilter = {
+          createdAt: {
+            $gte: new Date(currentDate.getFullYear(), 0, 1),
+            $lt: new Date(currentDate.getFullYear() + 1, 0, 1),
+          },
+        };
+        break;
+      default:
+        dateFilter = {
+          createdAt: {
+            $gte: new Date(currentDate.getFullYear(), 0, 1),
+            $lt: new Date(currentDate.getFullYear() + 1, 0, 1),
+          },
+        };
+        break;
+    }
+  }
+
+  let result;
+
+  if (role === "manager") {
+    result = await Sales.find(dateFilter).populate("productId");
+  } else if (role === "user") {
+    result = await Sales.find({ userEmail: email, ...dateFilter }).populate(
+      "productId"
+    );
+  } else {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid user role");
+  }
+
+  return result;
 };
 
-// Get yearly sales history
-export const getYearlySalesHistory = async () => {
-  const today = new Date();
-  const startOfYear = new Date(today.getFullYear(), 0, 1);
-  const endOfYear = new Date(today.getFullYear(), 11, 31);
-  const sales = await SaleModel.find({
-    saleDate: { $gte: startOfYear, $lte: endOfYear },
-  });
-  return sales;
+const getSingleSaleIntoDB = async (id: string) => {
+  const result = Sales.findById(id).populate("productId");
+  return result;
+};
+
+export const SalesServices = {
+  createSalesIntoDB,
+  getAllSalesIntoDB,
+  getSingleSaleIntoDB,
 };

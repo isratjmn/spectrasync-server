@@ -1,82 +1,55 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { MAIN_ROLE } from './user.constant';
-import bcrypt from 'bcrypt';
-import config from '../../config';
+/* eslint-disable @typescript-eslint/no-this-alias */
+import bcrypt from "bcrypt";
+import { Schema, model } from "mongoose";
+import { TUser, UserModel } from "./user.interface";
+import config from "../../config";
 
-// Define TUser interface
-export interface TUser extends Document {
-  _id: mongoose.Types.ObjectId;
-  username: string;
-  email: string;
-  password: string;
-  role: 'user' | 'manager';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Define UserSchema
-const UserSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModel>(
   {
-    username: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     password: {
       type: String,
       required: true,
     },
     role: {
       type: String,
-      enum: Object.values(MAIN_ROLE),
-      default: MAIN_ROLE.user,
+      enum: ["user", "manager"],
+      required: true,
+      default: "user",
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-UserSchema.pre('save', async function (next) {
+userSchema.pre("save", async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
+  // hashing password and save into DB
   user.password = await bcrypt.hash(
     user.password,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds)
   );
   next();
 });
 
-UserSchema.post('save', function (doc, next) {
-  doc.password = '';
+// set '' after saving password
+userSchema.post("save", function (doc, next) {
+  doc.password = "";
   next();
 });
 
-UserSchema.statics.isUserExists = async function (username: string) {
-  const existingUser = await User.findOne({ username });
-  return existingUser;
+userSchema.statics.isUserExistsByEmail = async function (email: string) {
+  return await User.findOne({ email }).select("+password");
 };
 
-UserSchema.statics.isPasswordMatched = async function (
-  plainTextPass: string,
-  hashedPass: string,
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword,
+  hashedPassword
 ) {
-  const isMatched = await bcrypt.compare(plainTextPass, hashedPass);
-  return isMatched;
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
 
-UserSchema.statics.isJWTIssuedBeforePasswordChanged = function (
-  passwordChangedTimestamp: Date,
-  jwtIssuedTimestamp: number,
-) {
-  const passwordChangedTimes =
-    new Date(passwordChangedTimestamp).getTime() / 1000;
-  return passwordChangedTimes > jwtIssuedTimestamp;
-};
-
-export type TUserRole = keyof typeof MAIN_ROLE;
-
-export const User = mongoose.model<TUser>('User', UserSchema);
+export const User = model<TUser, UserModel>("User", userSchema);

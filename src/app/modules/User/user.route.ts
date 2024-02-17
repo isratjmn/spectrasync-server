@@ -1,8 +1,20 @@
-import express from 'express';
-import { UserControllers } from './user.controller';
+import express from "express";
+import validateRequest from "../../middlewares/validateRequest";
+import { UserZodValidations } from "./user.validation";
+import { UserController } from "./user.controller";
 
-export const router = express.Router();
-router.post('/', UserControllers.authUserRegister);
-router.get('/', UserControllers.getAllUsers);
+const router = express.Router();
+
+router.post(
+  "/create-user",
+  validateRequest(UserZodValidations.createUserValidationSchema),
+  UserController.createUser
+);
+
+router.post(
+  "/login-user",
+  validateRequest(UserZodValidations.loginValidationSchema),
+  UserController.loginUser
+);
 
 export const UserRoutes = router;

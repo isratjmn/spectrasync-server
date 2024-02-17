@@ -1,28 +1,43 @@
-import { Manager } from '../Manager/manager.model';
-import { TUser, User } from './user.model';
+import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
+import { TLoginUser, TUser } from './user.interface';
+import { User } from './user.model';
+import { createToken } from './user.utils';
+import config from '../../config';
 
-const authUserRegisterIntoDB = async (payload: TUser) => {
-  const user = await User.create(payload);
-  return user;
-};
-
-/* const createManagerIntoDB = async (managerData: {
-  username: string;
-  email: string;
-  password?: string;
-}) => {
-  const newManager = new Manager(managerData);
-  const savedManager = await newManager.save();
-  return savedManager;
-}; */
-
-const getAllUsersFromDB = async () => {
-  const result = await User.find();
+const createUserIntoDB = async (payload: TUser) => {
+  if (await User.isUserExistsByEmail(payload.email)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'This email already used');
+  }
+  const result = await User.create(payload);
   return result;
 };
 
-export const authUserServices = {
-  authUserRegisterIntoDB,
-  // createManagerIntoDB,
-  getAllUsersFromDB,
+const loginUser = async (payload: TLoginUser) => {
+  const user = await User.isUserExistsByEmail(payload.email);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
+  }
+
+  if (!(await User.isPasswordMatched(payload?.password, user?.password)))
+    throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched');
+
+  const jwtPayload = {
+    name: user?.name,
+    email: user?.email,
+    role: user?.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  return accessToken;
+};
+
+export const UserServices = {
+  createUserIntoDB,
+  loginUser,
 };
