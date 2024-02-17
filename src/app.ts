@@ -10,7 +10,7 @@ const app: Application = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://spectrasync-glasses.netlify.app',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     optionsSuccessStatus: 204,
@@ -18,7 +18,7 @@ app.use(
 );
 
 app.get('/', (req: Request, res: Response) => {
-  res.send(` SpectraSync Server Running on port ${config.port}`);
+  res.send(`SpectraSync Server Running on port: ${config.port}..........`);
 });
 
 app.use('/api', router);
