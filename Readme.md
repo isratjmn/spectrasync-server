@@ -4,7 +4,7 @@
 
 SpectraSync Course Review is a Backend Application with robust data management system, facilitating user, order, and address organization. Powered by MongoDB, it ensures secure data storage and smooth operation, making it an essential tool for efficient application data handling.
 
-### Live Project Link: https://moonlit-tapioca-f8acb0.netlify.app/
+### Live Project Link: https://spectrasync-glasses.netlify.app/
 
 ## Prerequisites
 
