@@ -1,6 +1,6 @@
-import { TEyeglasses } from "./product.interface";
-import { Schema } from "mongoose";
-import { model } from "mongoose";
+import { TEyeglasses } from './product.interface';
+import { Schema } from 'mongoose';
+import { model } from 'mongoose';
 
 const eyeglassesSchema = new Schema<TEyeglasses>(
   {
@@ -38,7 +38,7 @@ const eyeglassesSchema = new Schema<TEyeglasses>(
     },
     gender: {
       type: String,
-      enum: ["Male", "Female"],
+      enum: ['Male', 'Female'],
       required: true,
     },
     color: {
@@ -49,7 +49,7 @@ const eyeglassesSchema = new Schema<TEyeglasses>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Eyeglass = model<TEyeglasses>("Eyeglass", eyeglassesSchema);
+export const Eyeglass = model<TEyeglasses>('Eyeglass', eyeglassesSchema);

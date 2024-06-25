@@ -2,9 +2,11 @@
 
 ### Eye Glass Dashboard Management App
 
-SpectraSync Course Review is a Backend Application with robust data management system, facilitating user, order, and address organization. Powered by MongoDB, it ensures secure data storage and smooth operation, making it an essential tool for efficient application data handling.
+SpectraSync Eye Glass is a Backend Application with robust data management system, facilitating user, order, and address organization. Powered by MongoDB, it ensures secure data storage and smooth operation, making it an essential tool for efficient application data handling.
 
 ### Live Project Link: https://spectrasync-glasses.netlify.app/
+
+### Server site Link: https://spectrasync-server.vercel.app/
 
 ## Prerequisites
 
@@ -42,7 +44,8 @@ Before you begin, make sure you have the following installed on your machine:
 
 Create a `.env` file in the root of the project and add any necessary environment variables. You can use the provided `.env.example` file as a template.
 
-```bash
+```
+  bash
   PORT=5000
   NODE_ENV=development
   DATABASE_URL=mongodb+srv://spectraUser:mnmn318600@cluster0.ocimcqo.mongodb.net/spectraDB?retryWrites=true&w=majority
@@ -52,7 +55,6 @@ Create a `.env` file in the root of the project and add any necessary environmen
   CLOUDINARY_CLOUD_NAME=dmr810p4l
   CLOUDINARY_API_KEY=847319449751949
   CLOUDINARY_API_SECRET=8XGZjxc8BtcWI8XZ1wwCVvg-x_0
-
 ```
 
 ## Usage

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createEyeglassesSchema = z.object({
   productName: z.string(),
@@ -9,9 +9,9 @@ export const createEyeglassesSchema = z.object({
   frameShape: z.string(),
   lensType: z.string(),
   brand: z.string(),
-  gender: z.enum(["Male", "Female"]),
+  gender: z.enum(['Male', 'Female']),
   color: z.string(),
-  userEmail: z.string(),
+  userEmail: z.string().optional(),
 });
 
 export const ProductValidation = {

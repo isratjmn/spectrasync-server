@@ -10,7 +10,11 @@ const app: Application = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: 'https://spectrasync-glasses.netlify.app',
+    origin: [
+      'https://spectrasync-glasses.netlify.app',
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     optionsSuccessStatus: 204,
@@ -22,11 +26,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api', router);
-
-// global error handler middleware
 app.use(globalErrorHandler);
 
-// not found middleware
 app.use(notFount);
-
 export default app;

@@ -7,7 +7,7 @@ export interface TEyeglasses {
   frameShape: string;
   lensType: string;
   brand: string;
-  gender: "Male" | "Female";
+  gender: 'Male' | 'Female';
   color: string;
   userEmail: string;
 }

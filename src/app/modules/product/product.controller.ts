@@ -75,6 +75,21 @@ const updateProduct = catchAsync(async (req, res) => {
   });
 });
 
+const duplicateProduct = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { payload } = req.body;
+  const duplicatedProduct = await EyeGlassServices.duplicateProductIntoDB(
+    id,
+    payload,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Products Duplicate Successfully....!!!',
+    data: duplicatedProduct,
+  });
+});
+
 export const ProductController = {
   createProduct,
   getAllProduct,
@@ -82,4 +97,5 @@ export const ProductController = {
   deleteProduct,
   updateProduct,
   deleteManyProduct,
+  duplicateProduct,
 };
