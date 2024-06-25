@@ -13,7 +13,6 @@ app.use(
     origin: [
       'https://spectrasync-glasses.netlify.app',
       'http://localhost:5173',
-      'http://localhost:5174',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -27,6 +26,5 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api', router);
 app.use(globalErrorHandler);
-
 app.use(notFount);
 export default app;
